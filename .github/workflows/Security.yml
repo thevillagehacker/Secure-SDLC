@@ -36,11 +36,14 @@ jobs:
       - name: Install Semgrep
         run: python -m pip install --upgrade pip && pip install semgrep
       - name: Run Semgrep (produce SARIF)
-        run: semgrep scan --config p/ci --sarif > semgrep-results.sarif || true
-      - name: Upload SARIF to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
+        run: |
+          # non-blocking first run; change below to add '--error' if you want to fail on findings
+          semgrep scan --config p/ci --sarif > semgrep-results.sarif || true
+      - name: Upload Semgrep SARIF
+        uses: actions/upload-artifact@v4
         with:
-          sarif_file: semgrep-results.sarif
+          name: semgrep-sarif
+          path: semgrep-results.sarif
 
   trivy:
     name: SCA / FS scan (Trivy)
